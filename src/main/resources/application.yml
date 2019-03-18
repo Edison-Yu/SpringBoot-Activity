@@ -1,0 +1,21 @@
+spring:
+#  数据库配置
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: "jdbc:mysql://127.0.0.1:3306/activity?characterEncoding=utf8&useSSL=true&serverTimezone=GMT%2B8"
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  main:
+    allow-bean-definition-overriding: true
+#  端口配置
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    session:
+      timeout: 10
+  port: 8080
