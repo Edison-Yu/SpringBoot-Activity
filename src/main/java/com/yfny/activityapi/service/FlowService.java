@@ -5,13 +5,11 @@ import com.yfny.activityapi.utils.UtilMisc;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.SequenceFlow;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.apache.commons.lang3.StringUtils;
@@ -37,18 +35,22 @@ public class FlowService {
     private ProcessEngineFactoryBean processEngine;
     @Autowired
     private RuntimeService runtimeService;
+    @Autowired
+    private TaskService taskService;
     /**
      * 获取历史节点流程图
      * 生成的流程图会高亮历史节点到当前的节点
-     * @param processInstanceId 流程实例ID
+     * @param taskId 任务ID
      * @return
      */
-    public InputStream getResourceDiagramInputStream(String processInstanceId) {
+    public InputStream getResourceDiagramInputStream(String taskId) {
         try {
+            Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+
             // 获取历史流程实例
-            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
             // 获取流程中已经执行的节点，按照执行先后顺序排序
-            List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery().processInstanceId(processInstanceId).orderByHistoricActivityInstanceId().asc().list();
+            List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery().processInstanceId(task.getParentTaskId()).orderByHistoricActivityInstanceId().asc().list();
             // 构造已执行的节点ID集合
             List<String> executedActivityIdList = new ArrayList<String>();
             for (HistoricActivityInstance activityInstance : historicActivityInstanceList) {
@@ -155,19 +157,20 @@ public class FlowService {
     /**
      * 根据当前流程实例ID获取流程图片流文件
      * 生成的流程图图片只高亮当前任务的节点
-     * @param processInstanceId 流程实例ID
+     * @param taskId 任务ID
      * @return
      */
-    public InputStream getDiagram(String processInstanceId) {
+    public InputStream getDiagram(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         //获得流程实例
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-                .processInstanceId(processInstanceId).singleResult();
+                .processInstanceId(task.getProcessInstanceId()).singleResult();
         String processDefinitionId = StringUtils.EMPTY;
         if (processInstance == null) {
             //查询已经结束的流程实例
             HistoricProcessInstance processInstanceHistory =
                     historyService.createHistoricProcessInstanceQuery()
-                            .processInstanceId(processInstanceId).singleResult();
+                            .processInstanceId(task.getProcessInstanceId()).singleResult();
             if (processInstanceHistory == null)
                 return null;
             else

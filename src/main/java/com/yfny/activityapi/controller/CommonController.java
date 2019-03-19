@@ -3,6 +3,10 @@ package com.yfny.activityapi.controller;
 import com.yfny.activityapi.service.CommonService;
 import com.yfny.activityapi.service.FlowService;
 import com.yfny.activityapi.utils.ActivitiUtils;
+import com.yfny.activityapi.utils.DeleteTaskCmd;
+import com.yfny.activityapi.utils.SetFLowNodeAndGoCmd;
+import org.activiti.bpmn.model.FlowNode;
+import org.activiti.bpmn.model.Process;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.util.json.JSONArray;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Activity通用接口
  * <p>
  * Created  by  jinboYu  on  2019/3/5
  */
@@ -30,8 +35,6 @@ public class CommonController {
 
     @Autowired
     private TaskService taskService;
-
-
 
     @Autowired
     private HistoryService historyService;
@@ -44,6 +47,12 @@ public class CommonController {
 
     @Autowired
     private FlowService flowService;
+
+    @Autowired
+    private RepositoryService repositoryService;
+
+    @Autowired
+    private ManagementService managementService;
 
     /**
      * 根据分组ID获取任务列表，带分页
@@ -164,17 +173,17 @@ public class CommonController {
     }
 
     /**
-     * 根据流程实例ID获取流程图
-     * @param processInstanceId    流程实例ID
+     * 根据流程实例ID获取流程图，高亮当前任务节点及历史节点
+     * @param taskId    任务ID
      * @param response
      */
-    @GetMapping(value = "/getImage/{processInstanceId}")
-    public void getImage(@PathVariable String processInstanceId,
+    @GetMapping(value = "/getImage/{taskId}")
+    public void getImage(@PathVariable String taskId,
                       HttpServletResponse response) {
         try {
             //根据当前流程实例ID获取图片输入流
 //            InputStream is = activitiService.getDiagram(task.getProcessInstanceId());
-            InputStream is = flowService.getResourceDiagramInputStream(processInstanceId);
+            InputStream is = flowService.getResourceDiagramInputStream(taskId);
             if (is == null)
                 return;
             response.setContentType("image/png");
@@ -188,12 +197,17 @@ public class CommonController {
         }
     }
 
-    @GetMapping(value = "/getDiagram/{processInstanceId}")
-    public void getDiagram(@PathVariable String processInstanceId,
+    /**
+     * 根据流程实例ID生成流程图，只高亮当前任务节点
+     * @param taskId    任务ID
+     * @param response
+     */
+    @GetMapping(value = "/getDiagram/{taskId}")
+    public void getDiagram(@PathVariable String taskId,
                         HttpServletResponse response){
         try {
             //根据当前流程实例ID获取图片输入流
-            InputStream is = flowService.getDiagram(processInstanceId);
+            InputStream is = flowService.getDiagram(taskId);
             if (is == null)
                 return;
             response.setContentType("image/png");
@@ -204,6 +218,30 @@ public class CommonController {
             out.close();
         } catch (Exception ex) {
             return;
+        }
+    }
+
+    /**
+     * 撤销流程
+     * @param taskId    流程任务ID
+     * @return
+     */
+    @PostMapping(value = "/revocationTask/{taskId}")
+    public String revocationTask(@PathVariable String taskId){
+        try {
+            //获取当前任务
+            Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+            //获取流程定义
+            Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
+            //获取目标节点定义
+            FlowNode targetNode = (FlowNode)process.getFlowElement("endevent1");
+            //删除当前运行任务
+            String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
+            //流程执行到来源节点
+            managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
+            return "撤销成功";
+        } catch (Exception e) {
+            return null;
         }
     }
 }

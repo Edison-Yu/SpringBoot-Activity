@@ -1,39 +1,20 @@
 package com.yfny.activityapi.service;
 
 import com.yfny.activityapi.utils.ActivitiUtils;
-import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.*;
-import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
+ * Activity通用Service
  * <p>
  * Created  by  jinboYu  on  2019/3/11
  */
 @Service
 public class CommonService {
-
-    @Autowired
-    private RuntimeService runtimeService;
-
-    @Autowired
-    private HistoryService historyService;
-
-    @Autowired
-    private RepositoryService repositoryService;
 
     @Autowired
     private ActivitiUtils activitiUtils;
