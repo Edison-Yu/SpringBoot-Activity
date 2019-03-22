@@ -48,12 +48,6 @@ public class CommonController {
     @Autowired
     private FlowService flowService;
 
-    @Autowired
-    private RepositoryService repositoryService;
-
-    @Autowired
-    private ManagementService managementService;
-
     /**
      * 根据分组ID获取任务列表，带分页
      * @param groupId   分组ID
@@ -228,20 +222,11 @@ public class CommonController {
      */
     @PostMapping(value = "/revocationTask/{taskId}")
     public String revocationTask(@PathVariable String taskId){
-        try {
-            //获取当前任务
-            Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
-            //获取流程定义
-            Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
-            //获取目标节点定义
-            FlowNode targetNode = (FlowNode)process.getFlowElement("endevent1");
-            //删除当前运行任务
-            String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
-            //流程执行到来源节点
-            managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
+        int i = commonService.revocationTask(taskId);
+        if (i==1){
             return "撤销成功";
-        } catch (Exception e) {
-            return null;
+        }else {
+            return "撤销失败";
         }
     }
 }

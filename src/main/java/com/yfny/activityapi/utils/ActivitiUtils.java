@@ -4,6 +4,7 @@ import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.repository.Deployment;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -70,17 +71,23 @@ public class ActivitiUtils {
      * @return
      */
     public ProcessInstance getProcessInstance(String userId, String key) {
+        //读取配置文件流
         InputStream in = this.getClass().getClassLoader().getSystemResourceAsStream("processes/" + key + ".zip");
 
         ZipInputStream zipInputStream = new ZipInputStream(in);
 
+        //部署流程实例
         Deployment deployment = repositoryService
                 .createDeployment()
                 .addZipInputStream(zipInputStream)
                 .key(key)
                 .deploy();
         identityService.setAuthenticatedUserId(userId);
-        return runtimeService.startProcessInstanceByKey(deployment.getKey());
+
+        //获取流程定义
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deployment.getId()).singleResult();
+        //根据流程定义启动流程
+        return runtimeService.startProcessInstanceById(processDefinition.getId());
     }
 
 
