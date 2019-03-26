@@ -12,7 +12,15 @@
     <artifactId>activity-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>activity-api</name>
-
+    <properties>
+        <aspectjweaver.version>1.8.13</aspectjweaver.version>
+        <commons-lang3.version>3.5</commons-lang3.version>
+        <json.version>20180813</json.version>
+        <oss-parent.version>9</oss-parent.version>
+        <commons-io.version>2.6</commons-io.version>
+        <freemarker.version>2.3.28</freemarker.version>
+        <snakeyaml.version>1.24</snakeyaml.version>
+    </properties>
     <dependencies>
         <!-- activiti6依赖 -->
         <dependency>

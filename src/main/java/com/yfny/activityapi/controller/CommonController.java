@@ -1,12 +1,8 @@
 package com.yfny.activityapi.controller;
 
-import com.yfny.activityapi.service.CommonService;
+import com.yfny.activityapi.service.impl.CommonServiceImpl;
 import com.yfny.activityapi.service.FlowService;
 import com.yfny.activityapi.utils.ActivitiUtils;
-import com.yfny.activityapi.utils.DeleteTaskCmd;
-import com.yfny.activityapi.utils.SetFLowNodeAndGoCmd;
-import org.activiti.bpmn.model.FlowNode;
-import org.activiti.bpmn.model.Process;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.util.json.JSONArray;
@@ -40,7 +36,7 @@ public class CommonController {
     private HistoryService historyService;
 
     @Autowired
-    private CommonService commonService;
+    private CommonServiceImpl commonService;
 
     @Autowired
     private ActivitiUtils activitiUtils;
@@ -129,8 +125,10 @@ public class CommonController {
      * @return  下一个任务的ID
      */
     @PostMapping(value = "/createTask/{userId}/{key}")
-    public String createTask(@PathVariable String userId,@PathVariable String key,@RequestBody Map<String,Object> variables){
-        return commonService.createTask(userId,key,variables);
+    public String createTask(@PathVariable String userId,@PathVariable String key,@RequestBody Map<String,Object> variables) throws Exception {
+        String taskId = commonService.createTask(userId,key,variables);
+        System.out.println(taskId);
+        return taskId;
     }
 
     /**
@@ -228,5 +226,19 @@ public class CommonController {
         }else {
             return "撤销失败";
         }
+    }
+
+    /**
+     * 创建用户
+     * @param userId
+     * @return
+     */
+    @PostMapping(value = "/createUser/{userId}")
+    public String createUser(@PathVariable String userId) throws Exception{
+        int i = commonService.createUser(userId);
+        if (i == 1) {
+            return "创建成功";
+        }
+        return "创建失败";
     }
 }
