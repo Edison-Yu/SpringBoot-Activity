@@ -1,7 +1,7 @@
 package com.yfny.activityapi.controller;
 
 import com.yfny.activityapi.service.impl.CommonServiceImpl;
-import com.yfny.activityapi.service.FlowService;
+import com.yfny.activityapi.service.impl.FlowServiceImpl;
 import com.yfny.activityapi.utils.ActivitiUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricProcessInstance;
@@ -42,7 +42,7 @@ public class CommonController {
     private ActivitiUtils activitiUtils;
 
     @Autowired
-    private FlowService flowService;
+    private FlowServiceImpl flowServiceImpl;
 
     /**
      * 根据分组ID获取任务列表，带分页
@@ -175,7 +175,7 @@ public class CommonController {
         try {
             //根据当前流程实例ID获取图片输入流
 //            InputStream is = activitiService.getDiagram(task.getProcessInstanceId());
-            InputStream is = flowService.getResourceDiagramInputStream(taskId);
+            InputStream is = flowServiceImpl.getResourceDiagramInputStream(taskId);
             if (is == null)
                 return;
             response.setContentType("image/png");
@@ -199,7 +199,7 @@ public class CommonController {
                         HttpServletResponse response){
         try {
             //根据当前流程实例ID获取图片输入流
-            InputStream is = flowService.getDiagram(taskId);
+            InputStream is = flowServiceImpl.getDiagram(taskId);
             if (is == null)
                 return;
             response.setContentType("image/png");
