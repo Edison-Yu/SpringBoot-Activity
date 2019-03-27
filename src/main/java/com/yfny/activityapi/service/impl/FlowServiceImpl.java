@@ -38,43 +38,41 @@ public class FlowServiceImpl implements FlowService {
     private RuntimeService runtimeService;
     @Autowired
     private TaskService taskService;
+
     /**
      * 获取历史节点流程图
      * 生成的流程图会高亮历史节点到当前的节点
+     *
      * @param taskId 任务ID
      * @return
      */
     public InputStream getResourceDiagramInputStream(String taskId) {
-        try {
-            Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 
-            // 获取历史流程实例
-            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
-            // 获取流程中已经执行的节点，按照执行先后顺序排序
-            List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery().processInstanceId(task.getParentTaskId()).orderByHistoricActivityInstanceId().asc().list();
-            // 构造已执行的节点ID集合
-            List<String> executedActivityIdList = new ArrayList<String>();
-            for (HistoricActivityInstance activityInstance : historicActivityInstanceList) {
-                executedActivityIdList.add(activityInstance.getActivityId());
-            }
-            // 获取bpmnModel
-            BpmnModel bpmnModel = repositoryService.getBpmnModel(historicProcessInstance.getProcessDefinitionId());
-            // 获取流程已发生流转的线ID集合
-            List<String> flowIds = this.getExecutedFlows(bpmnModel, historicActivityInstanceList);
-            // 使用默认配置获得流程图表生成器，并生成追踪图片字符流
-            ProcessDiagramGenerator processDiagramGenerator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
-            //你也可以 new 一个
-            //DefaultProcessDiagramGenerator processDiagramGenerator = new DefaultProcessDiagramGenerator();
-            InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel, "png", executedActivityIdList, flowIds, "宋体", "微软雅黑", "黑体", null, 1.0);
-            return imageStream;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        // 获取历史流程实例
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+        // 获取流程中已经执行的节点，按照执行先后顺序排序
+        List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery().processInstanceId(task.getParentTaskId()).orderByHistoricActivityInstanceId().asc().list();
+        // 构造已执行的节点ID集合
+        List<String> executedActivityIdList = new ArrayList<String>();
+        for (HistoricActivityInstance activityInstance : historicActivityInstanceList) {
+            executedActivityIdList.add(activityInstance.getActivityId());
         }
+        // 获取bpmnModel
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(historicProcessInstance.getProcessDefinitionId());
+        // 获取流程已发生流转的线ID集合
+        List<String> flowIds = this.getExecutedFlows(bpmnModel, historicActivityInstanceList);
+        // 使用默认配置获得流程图表生成器，并生成追踪图片字符流
+        ProcessDiagramGenerator processDiagramGenerator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
+        //你也可以 new 一个
+        //DefaultProcessDiagramGenerator processDiagramGenerator = new DefaultProcessDiagramGenerator();
+        InputStream imageStream = processDiagramGenerator.generateDiagram(bpmnModel, "png", executedActivityIdList, flowIds, "宋体", "微软雅黑", "黑体", null, 1.0);
+        return imageStream;
     }
 
     /**
      * 获取历史连线记录
+     *
      * @param bpmnModel
      * @param historicActivityInstances
      * @return
@@ -95,7 +93,7 @@ public class FlowServiceImpl implements FlowService {
         }
         // 遍历已完成的活动实例，从每个实例的outgoingFlows中找到已执行的
         FlowNode currentFlowNode = null;
-        for (int i =0;i<historicActivityInstances.size()-1;i++) {
+        for (int i = 0; i < historicActivityInstances.size() - 1; i++) {
             // 获得当前活动对应的节点信息及outgoingFlows信息
             currentFlowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(historicActivityInstances.get(i).getActivityId(), true);
             List<SequenceFlow> sequenceFlowList = currentFlowNode.getOutgoingFlows();
@@ -120,16 +118,16 @@ public class FlowServiceImpl implements FlowService {
             else if (BpmsActivityTypeEnum.EXCLUSIVE_GATEWAY.getType().equals(historicActivityInstances.get(i).getActivityType())) {
                 for (SequenceFlow sequenceFlow : sequenceFlowList) {
                     targetFlowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(sequenceFlow.getTargetRef(), true);
-                    if (historicFlowNodeList.contains(targetFlowNode)){
-                        if (historicActivityInstances.get(i + 1).getActivityId().equals(targetFlowNode.getId())){
+                    if (historicFlowNodeList.contains(targetFlowNode)) {
+                        if (historicActivityInstances.get(i + 1).getActivityId().equals(targetFlowNode.getId())) {
                             flowIdList.add(sequenceFlow.getId());
                         }
 
                     }
                 }
 
-            }else {
-                List<Map<String, String>> tempMapList = new LinkedList<Map<String,String>>();
+            } else {
+                List<Map<String, String>> tempMapList = new LinkedList<Map<String, String>>();
                 // 遍历历史活动节点，找到匹配Flow目标节点的
                 for (SequenceFlow sequenceFlow : sequenceFlowList) {
                     for (HistoricActivityInstance historicActivityInstance : historicActivityInstances) {
@@ -143,7 +141,7 @@ public class FlowServiceImpl implements FlowService {
                 String flowId = null;
                 for (Map<String, String> map : tempMapList) {
                     long activityStartTime = Long.valueOf(map.get("activityStartTime"));
-                    if (earliestStamp == 0 ||earliestStamp>=activityStartTime) {
+                    if (earliestStamp == 0 || earliestStamp >= activityStartTime) {
                         earliestStamp = activityStartTime;
                         flowId = map.get("flowId");
                     }
@@ -158,6 +156,7 @@ public class FlowServiceImpl implements FlowService {
     /**
      * 根据当前流程实例ID获取流程图片流文件
      * 生成的流程图图片只高亮当前任务的节点
+     *
      * @param taskId 任务ID
      * @return
      */
@@ -184,7 +183,7 @@ public class FlowServiceImpl implements FlowService {
         BpmnModel model = repositoryService.getBpmnModel(processDefinitionId);
         //获取流程实例当前的节点，需要高亮显示
         List<String> currentActs = Collections.EMPTY_LIST;
-        if (processInstance != null){
+        if (processInstance != null) {
             currentActs = runtimeService.getActiveActivityIds(processInstance.getId());
         }
         return ProcessEngines.getDefaultProcessEngine().getProcessEngineConfiguration()

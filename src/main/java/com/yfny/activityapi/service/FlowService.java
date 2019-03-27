@@ -1,5 +1,8 @@
 package com.yfny.activityapi.service;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.InputStream;
 
 /**
@@ -7,6 +10,7 @@ import java.io.InputStream;
  * <p>
  * Created  by  jinboYu  on  2019/3/26
  */
+@Transactional(propagation= Propagation.REQUIRED,rollbackFor=Exception.class)
 public interface FlowService {
 
     /**

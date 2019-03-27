@@ -11,8 +11,6 @@ import org.activiti.engine.identity.User;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -48,7 +46,7 @@ public class CommonServiceImpl implements CommonService {
      * @param variables
      * @return
      */
-    public String createTask(String userId, String key, Map<String, Object> variables) throws ArithmeticException {
+    public String createTask(String userId, String key, Map<String, Object> variables) throws Exception {
         //获取当前流程实例ID
         String processInstanceId = activitiUtils.getProcessInstance(userId, key).getId();
         //查询第一个任务
@@ -70,19 +68,15 @@ public class CommonServiceImpl implements CommonService {
      * @return
      */
     public String fulfilTask(String taskId, Map<String, Object> variables) {
-        try {
-            //根据任务ID获取当前任务实例
-            Task task = this.taskService.createTaskQuery().taskId(taskId).singleResult();
-            //设置流程任务变量
-            taskService.setVariables(taskId, variables);
-            //完成任务
-            taskService.complete(taskId);
-            //返回下一个任务的ID
-            taskId = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).singleResult().getId();
-            return "任务ID:" + taskId + ",流程实例ID:" + task.getProcessInstanceId();
-        } catch (Exception e) {
-            return null;
-        }
+        //根据任务ID获取当前任务实例
+        Task task = this.taskService.createTaskQuery().taskId(taskId).singleResult();
+        //设置流程任务变量
+        taskService.setVariables(taskId, variables);
+        //完成任务
+        taskService.complete(taskId);
+        //返回下一个任务的ID
+        taskId = taskService.createTaskQuery().processInstanceId(task.getProcessInstanceId()).singleResult().getId();
+        return "任务ID:" + taskId + ",流程实例ID:" + task.getProcessInstanceId();
     }
 
     /**
@@ -92,25 +86,22 @@ public class CommonServiceImpl implements CommonService {
      * @return
      */
     public int revocationTask(String taskId) {
-        try {
-            //获取当前任务
-            Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
-            //获取流程定义
-            Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
-            //获取目标节点定义
-            FlowNode targetNode = (FlowNode) process.getFlowElement("endevent1");
-            //删除当前运行任务
-            String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
-            //流程执行到来源节点
-            managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
-            return 1;
-        } catch (Exception e) {
-            return 0;
-        }
+        //获取当前任务
+        Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+        //获取流程定义
+        Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
+        //获取目标节点定义
+        FlowNode targetNode = (FlowNode) process.getFlowElement("endevent1");
+        //删除当前运行任务
+        String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
+        //流程执行到来源节点
+        String i = managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
+        return 1;
     }
 
     /**
      * 创建用户
+     *
      * @param userId
      * @return
      */
