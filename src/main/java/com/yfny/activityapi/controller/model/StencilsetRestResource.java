@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yfny.activityapi.controller.base;
+package com.yfny.activityapi.controller.model;
 
 import java.io.InputStream;
 
@@ -42,6 +42,7 @@ public class StencilsetRestResource {
     @RequestMapping(value = "/editor/stencilset", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public @ResponseBody
     String getStencilset() {
+        //stencilset.json为Model中的工具栏的名称字符，这里在resources下面查找
         InputStream stencilsetStream = this.getClass().getClassLoader().getResourceAsStream("stencilset.json");
         try {
             return IOUtils.toString(stencilsetStream, "utf-8");

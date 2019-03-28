@@ -951,7 +951,7 @@ jasmine.Env.prototype.contains_ = function(haystack, needle) {
 jasmine.Env.prototype.addEqualityTester = function(equalityTester) {
   this.equalityTesters_.push(equalityTester);
 };
-/** No-op base class for Jasmine reporters.
+/** No-op model class for Jasmine reporters.
  *
  * @constructor
  */

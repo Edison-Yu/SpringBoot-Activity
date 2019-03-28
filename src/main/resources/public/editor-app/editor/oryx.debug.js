@@ -7787,7 +7787,7 @@ ORYX.Core.StencilSet.Rules = {
 	},
 	
 	/**
-	 * @return {Array} An array of all base morph stencils
+	 * @return {Array} An array of all model morph stencils
 	 */
 	baseMorphs: function() {
 		var _baseMorphs = [];
@@ -7847,7 +7847,7 @@ ORYX.Core.StencilSet.Rules = {
 		var baseEdgeStencils = this.baseMorphs().select(function(e) { return edgeStencils.member(e); }); // again: intersection of sets
 		
 		if(baseEdgeStencils.size()>0)
-			return baseEdgeStencils[0]; // return any of the possible base morphs
+			return baseEdgeStencils[0]; // return any of the possible model morphs
 		else if(edgeStencils.size()>0)
 			return edgeStencils[0];	// return any of the possible stencils
 		
@@ -9219,7 +9219,7 @@ if(!ORYX.Core) {ORYX.Core = {};}
 
 
 /**
- * @classDescription Abstract base class for all objects that have a graphical representation
+ * @classDescription Abstract model class for all objects that have a graphical representation
  * within the editor.
  * @extends Clazz
  */
@@ -10294,7 +10294,7 @@ ORYX.Core.Canvas = ORYX.Core.AbstractShape.extend({
 	},
 	
 	/**
-	 * buggy crap! use base class impl instead! 
+	 * buggy crap! use model class impl instead!
 	 * @param {Object} iterator
 	 */
 /*	getChildEdges: function(iterator) {
@@ -12786,7 +12786,7 @@ ORYX.Core.Shape = {
 	 * Constructor
 	 */
 	construct: function(options, stencil, facade) {
-		// call base class constructor
+		// call model class constructor
 		arguments.callee.$.construct.apply(this, arguments);
 		
 		this.facade = facade;
@@ -12842,7 +12842,7 @@ ORYX.Core.Shape = {
 	 *  and updates the svg elements that are referenced by a property.
 	 */
 	refresh: function() {
-		//call base class refresh method
+		//call model class refresh method
 		arguments.callee.$.refresh.apply(this, arguments);
 		
 		if(this.node.ownerDocument) {
@@ -13698,7 +13698,7 @@ if(!ORYX.Core.Controls) {ORYX.Core.Controls = {};}
 
 
 /**
- * @classDescription Abstract base class for all Controls.
+ * @classDescription Abstract model class for all Controls.
  */
 ORYX.Core.Controls.Control = ORYX.Core.UIObject.extend({
 	
@@ -14189,7 +14189,7 @@ if (!ORYX.Core) {
 }
 
 /**
- * @classDescription Abstract base class for all Nodes.
+ * @classDescription Abstract model class for all Nodes.
  * @extends ORYX.Core.Shape
  */
 ORYX.Core.Node = {
@@ -15057,7 +15057,7 @@ if (!ORYX.Core) {
 
 
 /**
- * @classDescription Abstract base class for all connections.
+ * @classDescription Abstract model class for all connections.
  * @extends {ORYX.Core.Shape}
  * @param options {Object}
  *
@@ -15691,7 +15691,7 @@ ORYX.Core.Edge = {
 	},
     
     refresh: function(){
-        //call base class refresh method
+        //call model class refresh method
         arguments.callee.$.refresh.apply(this, arguments);
         
         //TODO consider points for marker mids
@@ -17077,7 +17077,7 @@ ORYX.Plugins.AbstractPlugin = Clazz.extend({
         '<link rel="schema.b3mn" href="http://b3mn.org" />' +
         '<link rel="schema.oryx" href="http://oryx-editor.org/" />' +
         '<link rel="schema.raziel" href="http://raziel.org/" />' +
-        '<base href="' +
+        '<model href="' +
         location.href.split("?")[0] +
         '" />' +
         '</head><body>' +

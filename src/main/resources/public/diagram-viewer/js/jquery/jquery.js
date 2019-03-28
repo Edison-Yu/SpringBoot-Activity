@@ -350,7 +350,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 	for ( ; i < length; i++ ) {
 		// Only deal with non-null/undefined values
 		if ( (options = arguments[ i ]) != null ) {
-			// Extend the base object
+			// Extend the model object
 			for ( name in options ) {
 				src = target[ name ];
 				copy = options[ name ];
@@ -7981,7 +7981,7 @@ jQuery.ajaxTransport( "script", function(s) {
 					}
 				};
 				// Use insertBefore instead of appendChild  to circumvent an IE6 bug.
-				// This arises when a base node is used (#2709 and #4378).
+				// This arises when a model node is used (#2709 and #4378).
 				head.insertBefore( script, head.firstChild );
 			},
 

@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yfny.activityapi.controller.base;
+package com.yfny.activityapi.controller.model;
 
 import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.engine.ActivitiException;
@@ -78,7 +78,8 @@ public class ModelEditorJsonRestResource implements ModelDataJsonConstants {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @RequestMapping(value = "/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
+//    @RequestMapping(value = "/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value="/model/{modelId}/json", method = RequestMethod.GET, produces = "application/json")
     public ObjectNode getEditorJson(@PathVariable String modelId) {
         ObjectNode modelNode = null;
 
