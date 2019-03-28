@@ -11,11 +11,14 @@ spring:
       ddl-auto: update
   main:
     allow-bean-definition-overriding: true
-#  端口配置
+    #  端口配置
+    server:
+      tomcat:
+        uri-encoding: UTF-8
+      servlet:
+        session:
+          timeout: 10
+      port: 8080
 server:
-  tomcat:
-    uri-encoding: UTF-8
   servlet:
-    session:
-      timeout: 10
-  port: 8080
+    context-path: "/activityApi"

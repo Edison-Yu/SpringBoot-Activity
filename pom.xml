@@ -12,15 +12,6 @@
     <artifactId>activity-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>activity-api</name>
-    <properties>
-        <aspectjweaver.version>1.8.13</aspectjweaver.version>
-        <commons-lang3.version>3.5</commons-lang3.version>
-        <json.version>20180813</json.version>
-        <oss-parent.version>9</oss-parent.version>
-        <commons-io.version>2.6</commons-io.version>
-        <freemarker.version>2.3.28</freemarker.version>
-        <snakeyaml.version>1.24</snakeyaml.version>
-    </properties>
     <dependencies>
         <!-- activiti6依赖 -->
         <dependency>
@@ -28,6 +19,31 @@
             <artifactId>activiti-spring-boot-starter-basic</artifactId>
             <version>6.0.0</version>
         </dependency>
+
+        <!--完整的引用activiti-modeler5.22，因为版本的问题，会和activiti6.0.0的引用有jar包冲突.所以这里只用引用其余的三个jar包就行了-->
+        <!--<dependency>-->
+            <!--<groupId>org.activiti</groupId>-->
+            <!--<artifactId>activiti-modeler</artifactId>-->
+            <!--<version>5.22.0</version>-->
+        <!--</dependency>-->
+        <!-- Activity-Modeler开始 -->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-json-converter</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        <!-- 添加解决Activiti6.0.0及以上版本与activiti-modeler的maven引用冲突 -->
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-transcoder</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-codec</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <!-- Activity-Modeler结束 -->
         <!-- mysql数据连接依赖 -->
         <dependency>
             <groupId>mysql</groupId>
