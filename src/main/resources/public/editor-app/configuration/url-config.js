@@ -21,7 +21,6 @@ var KISBPM = KISBPM || {};
 KISBPM.URL = {
 
     getModel: function(modelId) {
-        debugger;
         return ACTIVITI.CONFIG.contextRoot + '/model/' + modelId + '/json';
     },
 

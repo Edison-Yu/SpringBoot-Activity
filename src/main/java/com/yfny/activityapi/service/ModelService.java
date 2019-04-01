@@ -1,5 +1,6 @@
 package com.yfny.activityapi.service;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.engine.repository.Model;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.util.List;
  * Created  by  jinboYu  on  2019/3/28
  */
 @Transactional(propagation= Propagation.REQUIRED,rollbackFor=Exception.class)
-public interface FlowModelService {
+public interface ModelService {
 
     /**
      * 创建流程模型
@@ -26,11 +27,13 @@ public interface FlowModelService {
     void createModel(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
     /**
-     * 获取流程模型列表
+     * 获取流程模型,带分页
+     * @param pageNum   当前页
+     * @param pageSize  显示数量
      * @return
      * @throws Exception
      */
-    List<Model> selectModel() throws Exception;
+    List<Model> selectModel(int pageNum,int pageSize) throws Exception;
 
     /**
      * 保存流程模型
@@ -51,4 +54,11 @@ public interface FlowModelService {
     int deployModel(String modelId) throws Exception;
 
 
+    /**
+     * 获取模型json数据
+     * @param modelId
+     * @return
+     * @throws Exception
+     */
+    ObjectNode getEditorJson(@PathVariable String modelId) throws Exception;
 }

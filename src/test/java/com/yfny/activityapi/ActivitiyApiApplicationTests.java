@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.*;
 import java.util.List;
 
 
@@ -45,6 +46,38 @@ public class ActivitiyApiApplicationTests {
         IdentityService is = engine.getIdentityService();
         List<Group> groups = is.createNativeGroupQuery().sql("SELECT * FROM act_id_group WHERE NAME_ LIKE #{name}").parameter("name","%groupName%").list();
         System.out.println(groups.get(0).getName());
+    }
+
+    @Test
+    public void readFileByLines() {
+        File file = new File("D:/zz.txt");
+        //判断文件是否存在
+        if (!file.exists()) {
+            System.out.println("文件夹不存在");
+        }else {
+            BufferedReader reader = null;
+            StringBuffer sb = new StringBuffer();
+            try {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String tempString = null;
+                while ((tempString = reader.readLine()) != null) {
+                    int i = sb.lastIndexOf("}");
+
+                    sb.append(tempString);
+                }
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e1) {
+                    }
+                }
+            }
+            System.out.println("读取成功");
+        }
     }
 
 }

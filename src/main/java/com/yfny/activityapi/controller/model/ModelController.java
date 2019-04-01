@@ -1,10 +1,7 @@
 package com.yfny.activityapi.controller.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.yfny.activityapi.service.FlowModelService;
-import org.activiti.editor.constants.ModelDataJsonConstants;
-import org.activiti.engine.RepositoryService;
+import com.yfny.activityapi.service.ModelService;
 import org.activiti.engine.repository.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +21,7 @@ import java.util.List;
 public class ModelController {
 
     @Autowired
-    private FlowModelService flowModelService;
+    private ModelService modelService;
 
 
     /**
@@ -33,20 +30,27 @@ public class ModelController {
      * @param response
      * @throws Exception
      */
-    @RequestMapping("/create")
+    @GetMapping("/create")
     public void createModel(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        flowModelService.createModel(request,response);
+        modelService.createModel(request,response);
     }
 
 
+    @GetMapping(value="/{modelId}/json", produces = "application/json")
+    public ObjectNode getEditorJson(@PathVariable String modelId) throws Exception {
+        return modelService.getEditorJson(modelId);
+    }
+
     /**
-     * 获取所有流程模型
+     * 获取流程模型,带分页
+     * @param pageNum   当前页
+     * @param pageSize
      * @return
      * @throws Exception
      */
-    @GetMapping(value = "/selectModel")
-    public List<Model> selectModel() throws Exception{
-        return flowModelService.selectModel();
+    @GetMapping(value = "/selectModel/{pageNum}/{pageSize}")
+    public List<Model> selectModel(@PathVariable int pageNum,@PathVariable int pageSize) throws Exception{
+        return modelService.selectModel(pageNum,pageSize);
     }
 
     /**
@@ -62,7 +66,7 @@ public class ModelController {
     @PutMapping(value="/{modelId}/save")
     @ResponseStatus(value = HttpStatus.OK)
     public int saveModel(@PathVariable String modelId, String name, String description, String json_xml, String svg_xml) throws Exception {
-        return flowModelService.saveModel(modelId,name,description,json_xml,svg_xml);
+        return modelService.saveModel(modelId,name,description,json_xml,svg_xml);
     }
 
     /**
@@ -73,7 +77,7 @@ public class ModelController {
      */
     @GetMapping(value = "/deployModel/{modelId}")
     public int deployModel(@PathVariable String modelId) throws Exception {
-        return flowModelService.deployModel(modelId);
+        return modelService.deployModel(modelId);
     }
 
 }

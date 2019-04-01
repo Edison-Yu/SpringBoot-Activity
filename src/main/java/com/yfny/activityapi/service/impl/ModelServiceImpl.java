@@ -2,7 +2,7 @@ package com.yfny.activityapi.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.yfny.activityapi.service.FlowModelService;
+import com.yfny.activityapi.service.ModelService;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.constants.ModelDataJsonConstants;
@@ -15,6 +15,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_NAME;
  * Created  by  jinboYu  on  2019/3/28
  */
 @Service
-public class FlowModelServiceImpl implements FlowModelService {
+public class ModelServiceImpl implements ModelService {
 
     @Autowired
     private RepositoryService repositoryService;
@@ -68,6 +69,8 @@ public class FlowModelServiceImpl implements FlowModelService {
         modelData.setMetaInfo(modelObjectNode.toString());
         modelData.setName(modelName);
         modelData.setKey(modelKey);
+        //创建默认版本号0,保存后才是1
+        modelData.setVersion(0);
 
         //保存模型
         repositoryService.saveModel(modelData);
@@ -76,11 +79,20 @@ public class FlowModelServiceImpl implements FlowModelService {
 
     }
 
+    /**
+     * 获取流程模型,带分页
+     * @param pageNum   当前页
+     * @param pageSize  显示数量
+     * @return
+     * @throws Exception
+     */
     @Override
-    public List<Model> selectModel() throws Exception {
-        List<Model> modeList = repositoryService.createModelQuery().list();
-        if (modeList != null && modeList.size() > 0) {
-            return modeList;
+    public List<Model> selectModel(int pageNum,int pageSize) throws Exception {
+        pageNum = (pageNum - 1) * pageSize;
+        String selectModelSql = "SELECT * FROM act_re_model WHERE EDITOR_SOURCE_EXTRA_VALUE_ID_ !='' or EDITOR_SOURCE_EXTRA_VALUE_ID_ !=NULL";
+        List<Model> modelList = repositoryService.createNativeModelQuery().sql(selectModelSql).listPage(pageNum,pageSize);
+        if (modelList != null && modelList.size() > 0) {
+            return modelList;
         }else {
             return null;
         }
@@ -107,6 +119,7 @@ public class FlowModelServiceImpl implements FlowModelService {
         modelJson.put(MODEL_DESCRIPTION, description);
         model.setMetaInfo(modelJson.toString());
         model.setName(name);
+        model.setVersion(model.getVersion()+1);
 
         repositoryService.saveModel(model);
 
@@ -156,6 +169,33 @@ public class FlowModelServiceImpl implements FlowModelService {
         //根据流程定义启动流程
         runtimeService.startProcessInstanceById(processDefinition.getId());
         return 1;
+    }
+
+    /**
+     * 获取模型json数据
+     *
+     * @param modelId
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public ObjectNode getEditorJson(String modelId) throws Exception {
+        ObjectNode modelNode = null;
+        Model model = repositoryService.getModel(modelId);
+        if (model != null) {
+            if (StringUtils.isNotEmpty(model.getMetaInfo())) {
+                modelNode = (ObjectNode) objectMapper.readTree(model.getMetaInfo());
+            } else {
+                modelNode = objectMapper.createObjectNode();
+                modelNode.put("name", model.getName());
+            }
+            modelNode.put("modelId", model.getId());
+            ObjectNode editorJsonNode = (ObjectNode) objectMapper.readTree(
+                    new String(repositoryService.getModelEditorSource(model.getId()), "utf-8"));
+            modelNode.put("model", editorJsonNode);
+
+        }
+        return modelNode;
     }
 
 

@@ -19,13 +19,6 @@
             <artifactId>activiti-spring-boot-starter-basic</artifactId>
             <version>6.0.0</version>
         </dependency>
-
-        <!--完整的引用activiti-modeler5.22，因为版本的问题，会和activiti6.0.0的引用有jar包冲突.所以这里只用引用其余的三个jar包就行了-->
-        <!--<dependency>-->
-            <!--<groupId>org.activiti</groupId>-->
-            <!--<artifactId>activiti-modeler</artifactId>-->
-            <!--<version>5.22.0</version>-->
-        <!--</dependency>-->
         <!-- Activity-Modeler开始 -->
         <dependency>
             <groupId>org.activiti</groupId>
@@ -44,6 +37,14 @@
             <version>1.7</version>
         </dependency>
         <!-- Activity-Modeler结束 -->
+
+        <!--完整的引用activiti-modeler5.22，因为版本的问题，会和activiti6.0.0的引用有jar包冲突.所以这里只用引用上面的三个jar包就行了-->
+        <!--<dependency>-->
+            <!--<groupId>org.activiti</groupId>-->
+            <!--<artifactId>activiti-modeler</artifactId>-->
+            <!--<version>5.22.0</version>-->
+        <!--</dependency>-->
+
         <!-- mysql数据连接依赖 -->
         <dependency>
             <groupId>mysql</groupId>
