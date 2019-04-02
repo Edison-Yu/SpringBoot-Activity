@@ -1,8 +1,10 @@
 package com.yfny.activityapi.service;
 
+import org.activiti.engine.task.Task;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,4 +49,26 @@ public interface FlowTaskService {
      * @throws Exception
      */
     int createUser(String userId) throws Exception;
+
+    /**
+     * 根据用户ID查询任务,带分页
+     * @param userId    用户ID
+     * @param pageNum   当前页
+     * @param pageSize  显示数量
+     * @return
+     * @throws Exception
+     */
+    String getDemandByUserId( String userId,int pageNum, int pageSize)throws Exception;
+
+    /**
+     * 根据分组ID获取任务列表，带分页
+     *
+     * @param groupId  分组ID
+     * @param pageNum  当前页数
+     * @param pageSize 显示数量
+     * @return
+     */
+    String getDemandByGroupId(String groupId,int pageNum,int pageSize)throws Exception;
+
+    List<Task> getTaskListByUserId(String userId, int pageNum, int pageSize)throws Exception;
 }

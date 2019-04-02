@@ -1,8 +1,10 @@
 package com.yfny.activityapi;
 
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.identity.Group;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,6 +80,13 @@ public class ActivitiyApiApplicationTests {
             }
             System.out.println("读取成功");
         }
+    }
+
+    @Test
+    public void getTask(){
+        ProcessEngine engine = ProcessEngines.getDefaultProcessEngine();
+        HistoryService historyService = engine.getHistoryService();
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId("17507").singleResult();
     }
 
 }

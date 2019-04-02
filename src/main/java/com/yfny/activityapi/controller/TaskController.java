@@ -1,16 +1,10 @@
 package com.yfny.activityapi.controller;
 
 import com.yfny.activityapi.service.FlowTaskService;
-import com.yfny.activityapi.utils.ActivitiUtils;
-import org.activiti.engine.*;
-import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.impl.util.json.JSONArray;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,16 +18,10 @@ import java.util.Map;
 public class TaskController {
 
 
-    private TaskService taskService;
-
-    private HistoryService historyService;
 
     @Autowired
     private FlowTaskService flowTaskService;
 
-    //流程任务Service
-    @Autowired
-    private ActivitiUtils activitiUtils;
 
     /**
      * 根据分组ID获取任务列表，带分页
@@ -44,28 +32,8 @@ public class TaskController {
      * @return
      */
     @GetMapping(value = "/getDemandByGroupId/{groupId}/{pageNum}/{pageSize}")
-    public String getDemandByGroupId(@PathVariable String groupId, @PathVariable int pageNum, @PathVariable int pageSize) {
-        pageNum = (pageNum - 1) * pageSize;
-        List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-        //根据分组ID获取任务列表，不包含流程变量
-//        List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup(groupId).listPage(pageNum,pageSize);
-        //根据分组ID获取任务列表，包含流程变量
-        List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup(groupId).includeProcessVariables().listPage(pageNum, pageSize);
-        if (tasks != null && tasks.size() > 0) {
-            for (Task task : tasks) {
-                Map<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put("任务名称", task.getName());
-                resultMap.put("任务ID", task.getId());
-                resultMap.put("组织ID", task.getProcessVariables().get("zzid"));
-                resultMap.put("创建人", task.getProcessVariables().get("createName"));
-                resultMap.put("需求描述", task.getProcessVariables().get("demandReviews"));
-                resultList.add(resultMap);
-            }
-            JSONArray jsonArray = new JSONArray(resultList.toString());
-            return jsonArray.toString();
-        } else {
-            return "获取成功，该组织下任务数: 0 ";
-        }
+    public String getDemandByGroupId(@PathVariable String groupId, @PathVariable int pageNum, @PathVariable int pageSize) throws Exception {
+        return flowTaskService.getDemandByGroupId(groupId,pageNum,pageSize);
     }
 
     /**
@@ -77,35 +45,13 @@ public class TaskController {
      * @return
      */
     @GetMapping(value = "/getDemandByUserId/{userId}/{pageNum}/{pageSize}")
-    public String getDemandByUserId(@PathVariable String userId, @PathVariable int pageNum, @PathVariable int pageSize) {
-        pageNum = (pageNum - 1) * pageSize;
-        List<HistoricProcessInstance> historicProcessInstanceList = historyService.createHistoricProcessInstanceQuery().includeProcessVariables().startedBy(userId).listPage(pageNum, pageSize);
-        if (historicProcessInstanceList != null && historicProcessInstanceList.size() > 0) {
-            for (HistoricProcessInstance historicProcessInstance : historicProcessInstanceList) {
-                Task task = taskService.createTaskQuery().processInstanceId(historicProcessInstance.getId()).includeProcessVariables().singleResult();
-
-                System.out.println("任务ID：" + task.getId());
-            }
-            return "获取成功，该组织下任务数:" + historicProcessInstanceList.size();
-        } else {
-            return "获取成功，该组织下任务书: 0 ";
-        }
+    public String getDemandByUserId(@PathVariable String userId, @PathVariable int pageNum, @PathVariable int pageSize) throws Exception {
+        return flowTaskService.getDemandByUserId(userId,pageNum,pageSize);
     }
 
     @GetMapping(value = "/getTaskListByUserId/{userId}/{pageNum}/{pageSize}")
-    public List<Task> getTaskListByUserId(@PathVariable String userId, @PathVariable int pageNum, @PathVariable int pageSize) {
-        List<Task> taskList = new ArrayList<Task>();
-        pageNum = (pageNum - 1) * pageSize;
-        List<HistoricProcessInstance> historicProcessInstanceList = historyService.createHistoricProcessInstanceQuery().includeProcessVariables().startedBy(userId).listPage(pageNum, pageSize);
-        if (historicProcessInstanceList != null && historicProcessInstanceList.size() > 0) {
-            for (HistoricProcessInstance historicProcessInstance : historicProcessInstanceList) {
-                Task task = taskService.createTaskQuery().processInstanceId(historicProcessInstance.getId()).includeProcessVariables().singleResult();
-                taskList.add(task);
-            }
-            return taskList;
-        } else {
-            return taskList;
-        }
+    public List<Task> getTaskListByUserId(@PathVariable String userId, @PathVariable int pageNum, @PathVariable int pageSize) throws Exception {
+        return flowTaskService.getTaskListByUserId(userId,pageNum,pageSize);
     }
 
 
@@ -135,25 +81,6 @@ public class TaskController {
         return flowTaskService.fulfilTask(taskId, variables);
     }
 
-    /**
-     * 创建流程并获取第一个任务
-     *
-     * @param userId    创建人ID
-     * @param key       流程ID
-     * @param variables 流程变量
-     * @return 返回当前任务的ID
-     */
-    @PostMapping(value = "/createFlow/{userId}/{key}")
-    public String createFlow(@PathVariable String userId, @PathVariable String key, @RequestBody Map<String, Object> variables) throws Exception {
-        //获取当前流程实例ID
-        String processInstanceId = activitiUtils.getProcessInstance(userId, key).getId();
-        //查询第一个任务
-        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
-        //设置流程任务变量
-        taskService.setVariables(task.getId(), variables);
-        return task.getId();
-    }
-
 
     /**
      * 撤销流程
@@ -166,7 +93,9 @@ public class TaskController {
         int i = flowTaskService.revocationTask(taskId);
         if (i == 1) {
             return "撤销成功";
-        } else {
+        } else if (i==2){
+            return "撤销失败,任务不存在";
+        }else {
             return "撤销失败";
         }
     }

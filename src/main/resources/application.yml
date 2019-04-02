@@ -19,6 +19,9 @@ spring:
         session:
           timeout: 10
       port: 8080
+  activiti:
+    # 自动部署验证设置:true-开启（默认）、false-关闭
+    check-process-definitions: false
 server:
   servlet:
     context-path: "/activityApi"
